@@ -1,25 +1,36 @@
 package weather1;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import com.google.gson.JsonObject;
+import java.awt.color.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-
-import java.util.*;
 
 public class weather_1 extends JFrame {
 
-	
+
 	// API keys and their names
-	
+
 	// visit whenever you use API related stuff
     private static final String API_KEY = "5b88dcc18a8042dba2c202637242109"; //this may change after 4th october 2024
     //for current weather
@@ -29,42 +40,44 @@ public class weather_1 extends JFrame {
     //keep it ..lets see if this works or not.
     private static final String IP_LOOKUP_URL = "https://api.weatherapi.com/v1/ip.json?key=";
 
-    
+
     //for panel
-    
+
     private JLabel currentWeatherLabel;
     private JPanel forecastPanel;
+    private JPanel infoPanel;
+    private JLabel infoLabel;
      //constructor where i can give everything
     //i guess all.
-    
-    public weather_1() 
+
+    public weather_1()
     {
-    	
-    	//title 
+
+    	//title
         setTitle("Arshad weather App");
-        
+
         //setting size
         setSize(400, 500);
-        
+
         //exit on close
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
+
         //layout.......i like border layout
         setLayout(new BorderLayout());
 
         // Create top panel for user input and buttons
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new FlowLayout());
-        
+
         // button and text on it..
         JTextField cityInput = new JTextField(15);
         JButton getWeatherButton = new JButton("get info my dear");
-        
+
         //will see if the time permits..keep it as it is for now.
         JButton useLocationButton = new JButton("use my location");
-        
-        
+
+
         //adding labels, text field and button
         topPanel.add(new JLabel("City:"));
         topPanel.add(cityInput);
@@ -74,6 +87,20 @@ public class weather_1 extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
+        
+        
+        infoPanel = new JPanel();
+        infoPanel.setLayout(new BorderLayout());
+        infoPanel.setBackground(Color.WHITE);
+        infoPanel.setBorder(new EmptyBorder(5, 5, 5, 5));  // Add a small border
+        infoPanel.setVisible(false);  // Initially invisible
+
+        infoLabel = new JLabel("<html><b>Weather App Info</b><br>This app retrieves weather information for cities based on the OpenWeatherMap API.<br>[Optional: You can add more details here]</html>");
+        infoLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        infoPanel.add(infoLabel, BorderLayout.CENTER);
+        
+        
+        
         // Creating label for current weather
         currentWeatherLabel = new JLabel("i got this info about the city you entered", SwingConstants.CENTER);
         currentWeatherLabel.setPreferredSize(new Dimension(400, 100));
@@ -92,6 +119,8 @@ public class weather_1 extends JFrame {
                 displayWeatherForCity(city);
             }
         });
+
+        //addInfoIcon(headerPanel);
         //not sure why it is not working
         useLocationButton.addActionListener(new ActionListener() {
             @Override
@@ -135,7 +164,7 @@ public class weather_1 extends JFrame {
     // Get user's location based on their IP address
     private String getUserLocation() {
     	//using exception handling because i am not sure if this works or not.
-        try 
+        try
         {
             String url = IP_LOOKUP_URL + API_KEY + "&q=auto:ip";// will see how it works.
             String response = sendGetRequest(url);
@@ -148,11 +177,11 @@ public class weather_1 extends JFrame {
             return null;
         }
     }
-    
+
     //yay..it worked...
 
     // Sending GET request to URL given and return response as string
-    private static String sendGetRequest(String url) throws Exception// not sure which error i will it throw 
+    private static String sendGetRequest(String url) throws Exception// not sure which error i will it throw
     {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -165,7 +194,7 @@ public class weather_1 extends JFrame {
 
     // show weather details
     private void displayCurrentWeather(String response) {
-    	
+
     	//using json
         JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
         JsonObject currentWeather = jsonObject.getAsJsonObject("current");
@@ -175,17 +204,17 @@ public class weather_1 extends JFrame {
         String cityName = location.get("name").getAsString();//for name of the city entered
         double temperature = currentWeather.get("temp_c").getAsDouble();// taking celcius temperature...you can change to fahrenheit by keeping temp_f
         String condition = currentWeather.getAsJsonObject("condition").get("text").getAsString();
-        
+
         String iconUrl = "https:" + currentWeather.getAsJsonObject("condition").get("icon").getAsString();
 
-        currentWeatherLabel.setText("<html>Weather in " + cityName + ":<br>Temperature: " 
+        currentWeatherLabel.setText("<html>Weather in " + cityName + ":<br>Temperature: "
             + temperature + "°C<br>Condition: " + condition + "<br><img src='" + iconUrl + "'/></html>");
     }
 
     // Display 5-day weather forecast
     private void displayForecast(String response) {
-    	
-    	// creating json objects 
+
+    	// creating json objects
         JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
         JsonObject forecastObject = jsonObject.getAsJsonObject("forecast");
         JsonArray forecastArray = forecastObject.getAsJsonArray("forecastday");
@@ -199,20 +228,20 @@ public class weather_1 extends JFrame {
             String date = dayForecast.get("date").getAsString();
             //fetch day
             JsonObject day = dayForecast.getAsJsonObject("day");
-            
+
             //trying to get min and max temperature in celcius format
             double maxTemp = day.get("maxtemp_c").getAsDouble();
             double minTemp = day.get("mintemp_c").getAsDouble();
             String condition = day.getAsJsonObject("condition").get("text").getAsString();
-            
+
           //not sure if the image will be displayed or not...lets try
             String iconUrl = "https:" + day.getAsJsonObject("condition").get("icon").getAsString();
-            
-            
+
+
             JLabel forecastLabel = new JLabel("<html>" + date + " - Max: " + maxTemp + "°C, Min: " + minTemp
                     + "°C, Condition: " + condition + "<br><img src='" + iconUrl + "'/></html>");
             //forecast for 5 days.
-            
+
             forecastPanel.add(forecastLabel);
         }
 // not sure if this works or not
