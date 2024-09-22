@@ -54,7 +54,7 @@ public class weather_1 extends JFrame {
     {
 
     	//title
-        setTitle("Arshad weather App");
+        setTitle("Wather app by Arshad Mohammad");
 
         //setting size
         setSize(400, 500);
