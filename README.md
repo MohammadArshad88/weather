@@ -7,4 +7,4 @@
 # open command prompt
 # navigate to the directory where you have your project(weather_1.java file)
 # and execute the command javac weather_1.java ( this will compile your java code)
-# finally run it by executing the command java -cp .;lib/gson-2.8.8.jar weather_1.java
+# finally run it by executing the command java -cp your-path-to/gson-2.8.8.jar your-project-directory weather_1
